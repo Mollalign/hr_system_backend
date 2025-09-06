@@ -1,9 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+import uuid
 
-# -------------------------
-# User Manager
-# -------------------------
 class UserManager(BaseUserManager):
     def create_user(self, email, username, password=None, role='employee', **extra_fields):
         if not email:
@@ -21,19 +19,24 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-# -------------------------
-# Custom User Model
-# -------------------------
+
 class User(AbstractBaseUser, PermissionsMixin):
     ROLES = (
         ('admin', 'Admin'),
         ('hr_manager', 'HR Manager'),
         ('employee', 'Employee'),
     )
-    
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=50)
     role = models.CharField(max_length=20, choices=ROLES, default='employee')
+    profile_picture = models.ImageField(
+        upload_to="profile_pics/",
+        null=True,
+        blank=True,
+        default="profile_pics/default.png"
+    )
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False) 
     date_joined = models.DateTimeField(auto_now_add=True)
@@ -42,6 +45,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+
+    class Meta:
+        ordering = ["-date_joined"]
+        verbose_name = "User"
+        verbose_name_plural = "Users"
+        db_table = "users"
 
     def __str__(self):
         return f"{self.email} ({self.role})"
