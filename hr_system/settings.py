@@ -49,9 +49,15 @@ INSTALLED_APPS = [
 
     # third party
     'ninja',
+    'phonenumber_field',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    # third party middlewares
+    'corsheaders.middleware.CorsMiddleware',
+
+    # django middlewares
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -59,6 +65,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # custom middlewares
+    
 ]
 
 ROOT_URLCONF = 'hr_system.urls'
