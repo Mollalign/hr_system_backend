@@ -28,7 +28,7 @@ class Employee(models.Model):
     # Job Info
     employee_code = models.CharField(max_length=255)
     job_title = models.CharField(max_length=255)
-    department = models.ForeignKey('Department', on_delete=models.CASCADE, null=True, blank=True, related_name="employees")
+    department = models.ForeignKey('department.Department', on_delete=models.CASCADE, null=True, blank=True, related_name="employees")
     hire_date = models.DateField()
     employee_type = models.CharField(max_length=20, choices=[('permanent','Permanent'),('contract','Contract')], default="permanent")
 

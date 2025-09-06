@@ -15,7 +15,7 @@ class Department(models.Model):
     # ================
     # Manager Information
     # ================
-    manager = models.ForeignKey('Employee', on_delete=models.PROTECT, verbose_name="Manager", null=True, blank=True, related_name="departments_managed")
+    manager = models.ForeignKey('employees.Employee', on_delete=models.PROTECT, verbose_name="Manager", null=True, blank=True, related_name="departments_managed")
    
     # ================
     # Status Information
