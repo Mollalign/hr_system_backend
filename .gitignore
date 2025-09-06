@@ -1,0 +1,74 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.pyc
+*$py.class
+
+# =========================
+# Django / Ninja
+# =========================
+*.sqlite3
+db.sqlite3
+*.log
+*.pot
+*.pyc
+*.mo
+media/
+staticfiles/
+local_settings.py
+
+# =========================
+# Environment / Config
+# =========================
+.env
+*.env
+.env.*
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Virtual Environment
+# =========================
+venv/
+ENV/
+env/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# =========================
+# Migrations (optional: keep if you want versioned migrations)
+# =========================
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# =========================
+# Byte-compiled / cache
+# =========================
+__pycache__/
+*.py[cod]
+
+# =========================
+# Coverage / Testing
+# =========================
+.coverage
+coverage.xml
+htmlcov/
+*.cover
+*.py,cover
+.tox/
+.nox/
+.pytest_cache/
+
+# =========================
+# OS Specific
+# =========================
+.DS_Store
+Thumbs.db
