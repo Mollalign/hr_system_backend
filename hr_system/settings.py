@@ -70,6 +70,10 @@ MIDDLEWARE = [
     
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
+
 ROOT_URLCONF = 'hr_system.urls'
 
 TEMPLATES = [

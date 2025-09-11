@@ -78,7 +78,7 @@ class UpdateCompanyAddressRequest(Schema):
     @field_validator('branch_address')
     def validate_branch_address(cls, v):
         if len(v) < 10:
-            raise ValueError("Branch address must be at least 5 characters long")
+            raise ValueError("Branch address must be at least 10 characters long")
         return v
     
 # DELETE COMPANY ADDRESS REQUEST
