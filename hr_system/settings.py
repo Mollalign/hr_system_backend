@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'attendance',
     "department",
     "company_address",
+    "deduction",
+    "allowance",
 
     # third party
     'ninja',

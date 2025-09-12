@@ -11,8 +11,8 @@ import uuid
 # ===============================
 from department.models import Department
 from company_address.models import CompanyAddress
-# from allowance.models.allowance import Allowance
-# from deduction.models.deduction import Deduction
+from allowance.models import Allowance
+from deduction.models import Deduction
 from employees.models import Employee
 
 # ===============================
@@ -34,49 +34,14 @@ employee_router = Router(tags=["Employees"])
 # ===============================
 # EMPLOYEE API ENDPOINTS 
 # ===============================
-# get all employees
-@employee_router.get('/', response=EmployeeResponseSchema)
-def get_all_employees(request):
-    try:
-        employees = Employee.objects.filter(is_deleted=False)
-        print(employees)
-        serialized_employees = serialize_employee_list(employees)
-        return EmployeeResponseSchema(status=True, status_code=200, message="Employees fetched successfully", data=serialized_employees)
-    except Exception as e:
-        return EmployeeResponseSchema(status=False, status_code=500, message=str(e), data=[])
-
-
-# get all active employees
-@employee_router.get('/active', response=EmployeeResponseSchema)
-def get_active_employees(request):
-    try:
-        employees = Employee.objects.filter(is_deleted=False, is_active=True)
-        serialized_employees = serialize_employee_list(employees)
-        return EmployeeResponseSchema(status=True, status_code=200, message="Employees fetched successfully", data=serialized_employees)
-    except Exception as e:
-        return EmployeeResponseSchema(status=False, status_code=500, message=str(e), data=[])
-    
-# get employee by id
-@employee_router.get('/{id}', response=EmployeeResponseSchema)
-def get_employee_by_id(request, id: uuid.UUID):
-    try:
-        employee = Employee.objects.get(id=id, is_deleted=False)
-        serialized_employee = serialize_employee_single(employee)
-        return EmployeeResponseSchema(status=True, status_code=200, message="Employee fetched successfully", data=[serialized_employee])
-    except Employee.DoesNotExist:
-        return EmployeeResponseSchema(status=False, status_code=404, message="Employee not found", data=[])
-    except Exception as e:
-        return EmployeeResponseSchema(status=False, status_code=500, message=str(e), data=[])    
-    
-
 # create employee
 @employee_router.post('/', response=EmployeeResponseSchema)
 def create_employee(request, employee: CreateAndUpdateEmployeeRequestSchema):
     try:
         department = Department.objects.get(id=employee.department, is_deleted=False, is_active=True)
         work_location = CompanyAddress.objects.get(id=employee.work_location, is_deleted=False, is_active=True)
-        # allowance = Allowance.objects.filter(id__in=employee.allowance, is_deleted=False)
-        # deduction = Deduction.objects.filter(id__in=employee.deduction, is_deleted=False)
+        allowance = Allowance.objects.filter(id__in=employee.allowance, is_deleted=False)
+        deduction = Deduction.objects.filter(id__in=employee.deduction, is_deleted=False)
 
         employee_obj = Employee.objects.create(
             # Personal Info
@@ -134,8 +99,8 @@ def create_employee(request, employee: CreateAndUpdateEmployeeRequestSchema):
         )
 
         # Add allowance and deduction to the employee
-        # employee_obj.allowance.set(allowance)
-        # employee_obj.deduction.set(deduction)
+        employee_obj.allowance.set(allowance)
+        employee_obj.deduction.set(deduction)
 
         serialized_employee = serialize_employee_single(employee_obj)
 
@@ -144,12 +109,47 @@ def create_employee(request, employee: CreateAndUpdateEmployeeRequestSchema):
         return EmployeeResponseSchema(status=False, status_code=404, message="Department not found", data=[])
     except CompanyAddress.DoesNotExist:
         return EmployeeResponseSchema(status=False, status_code=404, message="Work location not found", data=[])
-    # except Allowance.DoesNotExist:
-    #     return EmployeeResponseSchema(status=False, status_code=404, message="Allowance not found", data=[])
-    # except Deduction.DoesNotExist:
-        # return EmployeeResponseSchema(status=False, status_code=404, message="Deduction not found", data=[])
+    except Allowance.DoesNotExist:
+        return EmployeeResponseSchema(status=False, status_code=404, message="Allowance not found", data=[])
+    except Deduction.DoesNotExist:
+        return EmployeeResponseSchema(status=False, status_code=404, message="Deduction not found", data=[])
     except Exception as e:
         return EmployeeResponseSchema(status=False, status_code=500, message=str(e), data=[])
+    
+
+# get all employees
+@employee_router.get('/', response=EmployeeResponseSchema)
+def get_all_employees(request):
+    try:
+        employees = Employee.objects.filter(is_deleted=False)
+        print(employees)
+        serialized_employees = serialize_employee_list(employees)
+        return EmployeeResponseSchema(status=True, status_code=200, message="Employees fetched successfully", data=serialized_employees)
+    except Exception as e:
+        return EmployeeResponseSchema(status=False, status_code=500, message=str(e), data=[])
+
+
+# get all active employees
+@employee_router.get('/active', response=EmployeeResponseSchema)
+def get_active_employees(request):
+    try:
+        employees = Employee.objects.filter(is_deleted=False, is_active=True)
+        serialized_employees = serialize_employee_list(employees)
+        return EmployeeResponseSchema(status=True, status_code=200, message="Employees fetched successfully", data=serialized_employees)
+    except Exception as e:
+        return EmployeeResponseSchema(status=False, status_code=500, message=str(e), data=[])
+    
+# get employee by id
+@employee_router.get('/{id}', response=EmployeeResponseSchema)
+def get_employee_by_id(request, id: uuid.UUID):
+    try:
+        employee = Employee.objects.get(id=id, is_deleted=False)
+        serialized_employee = serialize_employee_single(employee)
+        return EmployeeResponseSchema(status=True, status_code=200, message="Employee fetched successfully", data=[serialized_employee])
+    except Employee.DoesNotExist:
+        return EmployeeResponseSchema(status=False, status_code=404, message="Employee not found", data=[])
+    except Exception as e:
+        return EmployeeResponseSchema(status=False, status_code=500, message=str(e), data=[])    
     
 
 # update employee
@@ -210,13 +210,13 @@ def update_employee(request, id: uuid.UUID, employee_data: CreateAndUpdateEmploy
             work_location = CompanyAddress.objects.get(id=employee_data.work_location, is_deleted=False)
             employee.work_location = work_location
             
-        # if employee_data.allowance:
-        #     allowance = Allowance.objects.filter(id__in=employee_data.allowance, is_deleted=False)
-        #     employee.allowance.set(allowance)
+        if employee_data.allowance:
+            allowance = Allowance.objects.filter(id__in=employee_data.allowance, is_deleted=False)
+            employee.allowance.set(allowance)
             
-        # if employee_data.deduction:
-        #     deduction = Deduction.objects.filter(id__in=employee_data.deduction, is_deleted=False)
-        #     employee.deduction.set(deduction)
+        if employee_data.deduction:
+            deduction = Deduction.objects.filter(id__in=employee_data.deduction, is_deleted=False)
+            employee.deduction.set(deduction)
         
         # update employee
         employee.save()
