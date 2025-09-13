@@ -29,7 +29,7 @@ from .validation import validate_deduction
 # ===============================
 # ROUTERS
 # ===============================
-deduction_router = Router("Deduction")
+deduction_router = Router()
 
 # ===============================
 # API ENDPOINTS FOR DEDUCTION
@@ -47,13 +47,13 @@ def create_deduction(request, deduction: DeductionCreateAndUpdateRequestSchema):
         if message != "":
             return DeductionResponseSchema(status_code=400, success=False, message=message, data=[])
 
-        data =  [t.dict() for t in data]
-        for data in data:
-            if "id" not in data or not data["id"]: # check if id is not in data or id is not valid
-                data["id"] = str(uuid.uuid4())
+        data =  [t for t in data]
+        for item in data:
+            if "id" not in item or not item["id"]: 
+                item["id"] = str(uuid.uuid4())
 
         # Update deduction
-        category_obj.data.append(data)
+        category_obj.data.extend(data)   # use extend instead of append to add all new deductions
         category_obj.save()
         result = serialize_deduction_single(category_obj)
         return DeductionResponseSchema(status_code=200, success=True, message="Deduction created successfully", data=[result])
