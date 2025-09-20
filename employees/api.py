@@ -34,9 +34,35 @@ employee_router = Router(tags=["Employees"])
 # ===============================
 # EMPLOYEE API ENDPOINTS 
 # ===============================
-# create employee
-@employee_router.post('/', response=EmployeeResponseSchema)
+# =====================================================================
+# Endpoint: Create Employee
+# ---------------------------------------------------------------------
+# This API endpoint creates a new employee record in the database. 
+# It uses the Employee model to create the new record.
+# The endpoint is registered at the '/' path of the employee 
+# router and returns a response conforming to the EmployeeResponseSchema.
+# On success, it returns the created employee with its details; 
+# on failure, it returns an error message and an empty data list.
+# This endpoint is useful for administrative interfaces or dashboards 
+# where a new employee can be created.
+# =====================================================================
+@employee_router.post(
+    '/',
+    response=EmployeeResponseSchema,
+    description="Create employee. Returns the created employee with its details. Useful for administrative overviews and management dashboards.",
+    summary="Create employee",
+)
 def create_employee(request, employee: CreateAndUpdateEmployeeRequestSchema):
+    """
+    Create a new employee.
+
+    Args:
+        request: The request object.
+        employee: The employee data.
+
+    Returns:
+        The response object.
+    """
     try:
         department = Department.objects.get(id=employee.department, is_deleted=False, is_active=True)
         work_location = CompanyAddress.objects.get(id=employee.work_location, is_deleted=False, is_active=True)
@@ -102,7 +128,7 @@ def create_employee(request, employee: CreateAndUpdateEmployeeRequestSchema):
         employee_obj.allowance.set(allowance)
         employee_obj.deduction.set(deduction)
 
-        serialized_employee = serialize_employee_single(employee_obj)
+        serialized_employee = serialize_employee_single(employee_obj, db_name)
 
         return EmployeeResponseSchema(status=True, status_code=201, message="Employee created successfully", data=[serialized_employee])
     except Department.DoesNotExist:
@@ -115,7 +141,7 @@ def create_employee(request, employee: CreateAndUpdateEmployeeRequestSchema):
         return EmployeeResponseSchema(status=False, status_code=404, message="Deduction not found", data=[])
     except Exception as e:
         return EmployeeResponseSchema(status=False, status_code=500, message=str(e), data=[])
-    
+   
 
 # get all employees
 @employee_router.get('/', response=EmployeeResponseSchema)
@@ -155,19 +181,33 @@ def get_employee_by_id(request, id: uuid.UUID):
 # update employee
 @employee_router.put('/{id}', response=EmployeeResponseSchema)
 def update_employee(request, id: uuid.UUID, employee_data: CreateAndUpdateEmployeeRequestSchema):
+    """
+    Update an existing employee.
+
+    Args:
+        request: The request object.
+        id: The id of the employee.
+        employee_data: The employee data.
+
+    Returns:
+        The response object.
+    """
     try:
         employee = Employee.objects.get(id=id, is_deleted=False)
         
-        employee.full_name = employee_data.full_name
+        # Personal Info
+        employee.name = employee_data.full_name
         employee.gender = employee_data.gender
         employee.date_of_birth = employee_data.date_of_birth
         employee.maternal_status = employee_data.maternal_status
         employee.nationality = employee_data.nationality
         
+        # Contact Info
         employee.email = employee_data.email
-        
         employee.phone_number = employee_data.phone_number
         employee.alternative_phone_number = employee_data.alternative_phone_number
+
+        # Address Info
         employee.permanent_address = employee_data.permanent_address
         employee.current_address = employee_data.current_address
         employee.city = employee_data.city
@@ -175,24 +215,30 @@ def update_employee(request, id: uuid.UUID, employee_data: CreateAndUpdateEmploy
         employee.country = employee_data.country
         employee.zip_code = employee_data.zip_code
         
+        # Emergency Contact Info
         employee.contact_person_name = employee_data.contact_person_name
         employee.contact_person_relationship = employee_data.contact_person_relationship
         employee.contact_person_phone = employee_data.contact_person_phone
         employee.contact_person_alternative_phone = employee_data.contact_person_alternative_phone
         employee.contact_person_address = employee_data.contact_person_address
         
+        # Job Info
         employee.employee_code = employee_data.employee_code
         employee.job_title = employee_data.job_title
         employee.employee_type = employee_data.employee_type
         employee.employment_shift = employee_data.employment_shift
         employee.employment_status = employee_data.employment_status
         employee.hire_date = employee_data.hire_date
-        
+
+        # Bank Info
         employee.bank_account_number = employee_data.bank_account_number
+
+        # Salary Info
         employee.basic_salary = employee_data.basic_salary
         employee.effective_date = employee_data.effective_date
         employee.currency_of_salary = employee_data.currency_of_salary
         
+        # Status Information
         employee.is_active = employee_data.is_active
         employee.cv_file = employee_data.cv_file
         
@@ -209,25 +255,33 @@ def update_employee(request, id: uuid.UUID, employee_data: CreateAndUpdateEmploy
         if employee_data.work_location:
             work_location = CompanyAddress.objects.get(id=employee_data.work_location, is_deleted=False)
             employee.work_location = work_location
-            
+
+        # Allowance Info
         if employee_data.allowance:
             allowance = Allowance.objects.filter(id__in=employee_data.allowance, is_deleted=False)
-            employee.allowance.set(allowance)
-            
+            employee.allowance = [str(u) for u in employee_data.allowance]
+        
         if employee_data.deduction:
-            deduction = Deduction.objects.filter(id__in=employee_data.deduction, is_deleted=False)
-            employee.deduction.set(deduction)
+            other_deduction = Deduction.objects.filter(type="Other").first()
+            data = [d for d in other_deduction.data if uuid.UUID(d['id']) in employee_data.deduction]
+ 
+            if data:
+                employee.deduction = [str(u['id']) for u in data]
+            else:
+                raise Deduction.DoesNotExist
         
         # update employee
         employee.save()
-
         serialized_employee = serialize_employee_single(employee)
         return EmployeeResponseSchema(status=True, status_code=200, message="Employee updated successfully", data=[serialized_employee])
     except Employee.DoesNotExist:
         return EmployeeResponseSchema(status=False, status_code=404, message="Employee not found", data=[])
+    except Allowance.DoesNotExist:
+        return EmployeeResponseSchema(status=False, status_code=404, message="One or more Allowance not found", data=[])
+    except Deduction.DoesNotExist:
+        return EmployeeResponseSchema(status=False, status_code=404, message="One or more Deduction not found", data=[])
     except Exception as e:
         return EmployeeResponseSchema(status=False, status_code=500, message=str(e), data=[])
-
 # delete employee
 @employee_router.delete('/{id}', response=EmployeeResponseSchema)
 def delete_employee(request, id: uuid.UUID):
@@ -241,3 +295,37 @@ def delete_employee(request, id: uuid.UUID):
     except Exception as e:
         return EmployeeResponseSchema(status=False, status_code=500, message=str(e), data=[])    
     
+# =====================================================================
+# Endpoint: Delete All Employees(hard delete)
+# ---------------------------------------------------------------------
+# This API endpoint deletes all employee records from the database. 
+# It uses the Employee model to delete the records.
+# The endpoint is registered at the '/' path of the employee 
+# router and returns a response conforming to the EmployeeResponseSchema.
+# On success, it returns a success message; on failure, it returns an error message and an empty data list.
+# This endpoint is useful for administrative interfaces or dashboards 
+# where all employees can be deleted.
+# =====================================================================
+@employee_router.delete(
+    '/',
+    response=EmployeeResponseSchema,
+    description="Delete all employees. Returns a success message. Useful for administrative overviews and management dashboards.",
+    summary="Delete all employees(hard delete)",
+)
+def delete_all_employees(request):
+    """
+    Delete all employees.
+
+    Args:
+        request: The request object.
+
+    Returns:
+        The response object.
+    """
+    try:
+        employees = Employee.objects.all()
+        for employee in employees:
+            employee.delete()
+        return EmployeeResponseSchema(status=True, status_code=200, message="All employees deleted successfully", data=[])
+    except Exception as e:
+        return EmployeeResponseSchema(status=False, status_code=500, message=str(e), data=[])

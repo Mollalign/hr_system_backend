@@ -41,13 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # our apps
-    'users',
     'employees',
     'attendance',
     "department",
     "company_address",
     "deduction",
     "allowance",
+    "payroll",
 
     # third party
     'ninja',
@@ -152,7 +152,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'users.User'
+# AUTH_USER_MODEL = 'users.User'
 
 # file uploading
 MEDIA_URL = "/media/"
