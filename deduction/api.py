@@ -29,7 +29,7 @@ from .validation import validate_deduction
 # ===============================
 # ROUTERS
 # ===============================
-deduction_router = Router()
+deduction_router = Router(tags=["Deduction"])
 
 # ===============================
 # API ENDPOINTS FOR DEDUCTION

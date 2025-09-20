@@ -29,7 +29,7 @@ from .validation import validate_allowance
 # ===============================
 # ROUTERS
 # ===============================
-allowance_router = Router()
+allowance_router = Router(tags=["Allowance"])
 
 # ===============================
 # API ENDPOINTS FOR ALLOWANCE

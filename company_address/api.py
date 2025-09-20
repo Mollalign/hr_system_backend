@@ -12,7 +12,7 @@ from ninja.errors import ValidationError
 import uuid
 
 
-company_address_router = Router()
+company_address_router = Router(tags=["Company address"])
 
 # ===============================
 # API ENDPOINTS FOR COMPANY ADDRESS
