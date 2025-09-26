@@ -41,7 +41,9 @@ class Deduction(models.Model):
     
     # Status Information    
     is_active = models.BooleanField(default=True, verbose_name="is active", null=False, blank=False) #for tax and pension for other it is always true because it is contine on data for every deducation on other its based on data 
-
+     
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True) 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

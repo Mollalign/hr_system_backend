@@ -67,7 +67,12 @@ def create_employee(request, employee: CreateAndUpdateEmployeeRequestSchema):
         department = Department.objects.get(id=employee.department, is_deleted=False, is_active=True)
         work_location = CompanyAddress.objects.get(id=employee.work_location, is_deleted=False, is_active=True)
         allowance = Allowance.objects.filter(id__in=employee.allowance, is_deleted=False)
-        deduction = Deduction.objects.filter(id__in=employee.deduction, is_deleted=False)
+        deduction = Deduction.objects.filter(type="Other").first()
+        deduction_data = [d for d in deduction.data if d['id'] in employee.deduction]
+        deduction_data = [str(d['id']) for d in deduction_data]
+
+        if not deduction_data:
+            raise Deduction.DoesNotExist
 
         employee_obj = Employee.objects.create(
             # Personal Info
@@ -122,15 +127,15 @@ def create_employee(request, employee: CreateAndUpdateEmployeeRequestSchema):
 
             # Documents
             cv_file=employee.cv_file if employee.cv_file else None,
+
+            # Deduction Info
+            deduction=deduction_data,
+            allowance=employee.allowance,
         )
 
-        # Add allowance and deduction to the employee
-        employee_obj.allowance.set(allowance)
-        employee_obj.deduction.set(deduction)
+        data = serialize_employee_single(employee_obj)
 
-        serialized_employee = serialize_employee_single(employee_obj, db_name)
-
-        return EmployeeResponseSchema(status=True, status_code=201, message="Employee created successfully", data=[serialized_employee])
+        return EmployeeResponseSchema(status=True, status_code=201, message="Employee created successfully", data=[data])
     except Department.DoesNotExist:
         return EmployeeResponseSchema(status=False, status_code=404, message="Department not found", data=[])
     except CompanyAddress.DoesNotExist:
@@ -141,7 +146,7 @@ def create_employee(request, employee: CreateAndUpdateEmployeeRequestSchema):
         return EmployeeResponseSchema(status=False, status_code=404, message="Deduction not found", data=[])
     except Exception as e:
         return EmployeeResponseSchema(status=False, status_code=500, message=str(e), data=[])
-   
+
 
 # get all employees
 @employee_router.get('/', response=EmployeeResponseSchema)
@@ -194,7 +199,7 @@ def update_employee(request, id: uuid.UUID, employee_data: CreateAndUpdateEmploy
     """
     try:
         employee = Employee.objects.get(id=id, is_deleted=False)
-        
+
         # Personal Info
         employee.name = employee_data.full_name
         employee.gender = employee_data.gender
@@ -259,14 +264,15 @@ def update_employee(request, id: uuid.UUID, employee_data: CreateAndUpdateEmploy
         # Allowance Info
         if employee_data.allowance:
             allowance = Allowance.objects.filter(id__in=employee_data.allowance, is_deleted=False)
-            employee.allowance = [str(u) for u in employee_data.allowance]
+            employee.allowance = employee_data.allowance
         
         if employee_data.deduction:
             other_deduction = Deduction.objects.filter(type="Other").first()
-            data = [d for d in other_deduction.data if uuid.UUID(d['id']) in employee_data.deduction]
+            data = [d for d in other_deduction.data if d['id'] in employee_data.deduction]
+            data = [str(d['id']) for d in data]
  
             if data:
-                employee.deduction = [str(u['id']) for u in data]
+                employee.deduction = data
             else:
                 raise Deduction.DoesNotExist
         
@@ -282,6 +288,7 @@ def update_employee(request, id: uuid.UUID, employee_data: CreateAndUpdateEmploy
         return EmployeeResponseSchema(status=False, status_code=404, message="One or more Deduction not found", data=[])
     except Exception as e:
         return EmployeeResponseSchema(status=False, status_code=500, message=str(e), data=[])
+
 # delete employee
 @employee_router.delete('/{id}', response=EmployeeResponseSchema)
 def delete_employee(request, id: uuid.UUID):

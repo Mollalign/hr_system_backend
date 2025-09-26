@@ -10,21 +10,32 @@ def validate_tax(data: list[dict]):
             # Validate schema types (field existence + types)
             valid_data = TaxCreateAndUpdateRequestSchema(**item)
 
-            # Business rules validation
+            # Name validation
             if not valid_data.name or valid_data.name.strip() == "":
                 errors[f"{index}.name"] = "Name is required and must be a string"
+
+            # Min salary validation
             if valid_data.min_salary < 0:
-                errors[f"{index}.min_salary"] = "Minimum salary must be greater than or equal to 0 and must be a number"
-            if valid_data.max_salary == "UNLIMITED":
+                errors[f"{index}.min_salary"] = "Minimum salary must be >= 0 and a number"
+
+            # Max salary normalization
+            if isinstance(valid_data.max_salary, str) and valid_data.max_salary.lower() in ["unlimited", "above"]:
                 valid_data.max_salary = None
-            if valid_data.max_salary is not None and valid_data.max_salary <= 0:
-                errors[f"{index}.max_salary"] = "Maximum salary must be greater than 0 and must be a number"
-            if valid_data.max_salary is not None and (valid_data.max_salary < valid_data.min_salary):
-                errors[f"{index}.max_salary"] = "Maximum salary must be greater than minimum salary"
+
+            # Max salary validation (only if it's a number)
+            if valid_data.max_salary is not None:
+                if not isinstance(valid_data.max_salary, (int, float)):
+                    errors[f"{index}.max_salary"] = "Maximum salary must be a number or 'unlimited'"
+                elif valid_data.max_salary <= 0:
+                    errors[f"{index}.max_salary"] = "Maximum salary must be > 0"
+                elif valid_data.max_salary < valid_data.min_salary:
+                    errors[f"{index}.max_salary"] = "Maximum salary must be >= minimum salary"
+
+            # Rate and deduction validation
             if valid_data.rate < 0:
-                errors[f"{index}.rate"] = "Rate must be greater than or equal to 0 and must be a number"
+                errors[f"{index}.rate"] = "Rate must be >= 0 and a number"
             if valid_data.deduction < 0:
-                errors[f"{index}.deduction"] = "Deduction must be greater than or equal to 0 and must be a number"
+                errors[f"{index}.deduction"] = "Deduction must be >= 0 and a number"
 
             validated_items.append(valid_data)
 
