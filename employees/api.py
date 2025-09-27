@@ -66,9 +66,17 @@ def create_employee(request, employee: CreateAndUpdateEmployeeRequestSchema):
     try:
         department = Department.objects.get(id=employee.department, is_deleted=False, is_active=True)
         work_location = CompanyAddress.objects.get(id=employee.work_location, is_deleted=False, is_active=True)
-        allowance = Allowance.objects.filter(id__in=employee.allowance, is_deleted=False)
+       
+        # Allowance
+        allowance_ids = list(Allowance.objects
+                     .filter(id__in=employee.allowance, is_deleted=False)
+                     .values_list("id", flat=True))
+        allowance_ids = [str(aid) for aid in allowance_ids]
+
+        # Deduction
         deduction = Deduction.objects.filter(type="Other").first()
-        deduction_data = [d for d in deduction.data if d['id'] in employee.deduction]
+        deduction_ids = [str(uuid) for uuid in employee.deduction]
+        deduction_data = [d for d in deduction.data if str(d['id']) in deduction_ids]
         deduction_data = [str(d['id']) for d in deduction_data]
 
         if not deduction_data:
@@ -130,7 +138,7 @@ def create_employee(request, employee: CreateAndUpdateEmployeeRequestSchema):
 
             # Deduction Info
             deduction=deduction_data,
-            allowance=employee.allowance,
+            allowance=allowance_ids,
         )
 
         data = serialize_employee_single(employee_obj)
@@ -201,7 +209,7 @@ def update_employee(request, id: uuid.UUID, employee_data: CreateAndUpdateEmploy
         employee = Employee.objects.get(id=id, is_deleted=False)
 
         # Personal Info
-        employee.name = employee_data.full_name
+        employee.full_name = employee_data.full_name
         employee.gender = employee_data.gender
         employee.date_of_birth = employee_data.date_of_birth
         employee.maternal_status = employee_data.maternal_status
@@ -263,16 +271,20 @@ def update_employee(request, id: uuid.UUID, employee_data: CreateAndUpdateEmploy
 
         # Allowance Info
         if employee_data.allowance:
-            allowance = Allowance.objects.filter(id__in=employee_data.allowance, is_deleted=False)
-            employee.allowance = employee_data.allowance
+            allowance_ids = list(Allowance.objects
+                     .filter(id__in=employee.allowance, is_deleted=False)
+                     .values_list("id", flat=True))
+            allowance_ids = [str(aid) for aid in allowance_ids]
+            employee.allowance = allowance_ids
         
         if employee_data.deduction:
             other_deduction = Deduction.objects.filter(type="Other").first()
-            data = [d for d in other_deduction.data if d['id'] in employee_data.deduction]
-            data = [str(d['id']) for d in data]
+            deduction_ids = [str(uuid) for uuid in employee.deduction]
+            deduction_data = [d for d in other_deduction.data if str(d['id']) in deduction_ids]
+            deduction_data = [str(d['id']) for d in deduction_data]
  
-            if data:
-                employee.deduction = data
+            if deduction_data:
+                employee.deduction = deduction_data
             else:
                 raise Deduction.DoesNotExist
         

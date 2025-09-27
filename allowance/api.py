@@ -24,7 +24,7 @@ from .serializer import serialize_allowance, serialize_allowance_list
 # ===============================
 # VALIDATION
 # ===============================
-from .validation import validate_allowance
+from .validation import validate_allowance, validate_update_allowance
 
 # ===============================
 # ROUTERS
@@ -95,7 +95,7 @@ def get_allowance_by_id(request, id: uuid.UUID):
 def update_allowances(request, id: uuid.UUID, allowance: CreateAndUpdateAllowanceSchema):
     try:
 
-        message = validate_allowance(allowance.dict())
+        message = validate_update_allowance(allowance.dict())
         if message != "":
             return AllowanceResponseSchema(status=False, status_code=400, message=message, data=[])
 

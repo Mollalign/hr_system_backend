@@ -96,16 +96,16 @@ def update_deduction(request, id: uuid.UUID, deduction: DeductionCreateAndUpdate
         category_obj = Deduction.objects.get(type=deduction.type)
         data = deduction.data
 
-        message = validate_deduction(data, category_obj.type)
-        if message != "":
-            return DeductionResponseSchema(status_code=400, success=False, message=message, data=[])
+        # message = validate_deduction(data, category_obj.type)
+        # if message != "":
+        #     return DeductionResponseSchema(status_code=400, success=False, message=message, data=[])
 
-        data =  [t.dict() for t in data]
-        for data in data:
-            if "id" not in data or not data["id"]: # check if id is not in data or id is not valid
-                data["id"] = str(uuid.uuid4())
+        data =  [t for t in data]
+        for item in data:
+            if "id" not in item or not item["id"]: 
+                item["id"] = str(uuid.uuid4())
 
-        data =  [t.dict() for t in data]
+
         for index, existing_data in enumerate(category_obj.data):
             if existing_data['id'] == str(id):
                 updated_data = {**existing_data, **data[0]}

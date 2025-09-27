@@ -94,7 +94,7 @@ class Employee(models.Model):
     # contact info
     email = models.EmailField(max_length=255, unique=True, verbose_name="Email", null=False, blank=False)
     phone_number = PhoneNumberField(unique=True, verbose_name="Phone Number", null=False, blank=False)
-    alternative_phone_number = PhoneNumberField(unique=True, verbose_name="Alternative Phone Number", null=True, blank=True)
+    alternative_phone_number = PhoneNumberField(unique=False, verbose_name="Alternative Phone Number", null=True, blank=True)
 
     # address info
     permanent_address = models.CharField(max_length=255, verbose_name="Permanent Address", null=False, blank=False, default="")
@@ -134,8 +134,18 @@ class Employee(models.Model):
     currency_of_salary = models.CharField(max_length=5, verbose_name="Currency of Salary", null=False, blank=False, default="ETB")
 
     # Documents
-    cv_file = models.FileField(upload_to='cv_files/', null=True, blank=True, verbose_name="CV File", validators=[FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt', 'ods', 'odp', 'odg', 'odf', 'odc', 'odm', 'odt', 'odp', 'ods', 'odg', 'odf', 'odc', 'odm'])])
-
+    cv_file = models.FileField(
+        upload_to='cv_files/',
+        null=True,
+        blank=True,
+        verbose_name="CV File",
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt']
+            )
+        ]
+    )
+    
     # Status Information
     is_active = models.BooleanField(default=True, verbose_name="Status", null=False, blank=False)  # active/inactive
     is_deleted = models.BooleanField(default=False)

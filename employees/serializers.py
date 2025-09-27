@@ -4,6 +4,8 @@
 from employees.models import Employee
 from employees.schemas import EmployeeSchema, CompanyAddressSchema, AllowanceSchema, DeductionSchema
 from department.schemas import DepartmentDataSchema
+from utility.employee import get_allowance_data_by_id, get_deduction_data_by_id 
+
 def serialize_employee(employee: Employee):
     return EmployeeSchema(
         # Personal Info
@@ -61,16 +63,36 @@ def serialize_employee(employee: Employee):
 
                 # Salary Info
                 basic_salary=employee.basic_salary,
-                allowance=employee.allowance,
-                deduction=employee.deduction,
+                allowance=[
+                    AllowanceSchema(
+                        id=str(a.id),
+                        name=a.name,
+                        type=a.type,
+                        percentage=a.percentage,
+                        amount=a.amount,
+                        description=a.description,
+                        is_active=a.is_active,
+                    )
+                    for a in get_allowance_data_by_id(employee.allowance)
+                ],
+                deduction=[
+                    DeductionSchema(
+                        id=str(d['id']),
+                        name=d['name'],
+                        type=d['type'],
+                        percentage=d['percentage'],
+                        amount=d['amount'],
+                        description=d['description'],
+                        is_active=d['is_active'],
+                    )
+                    for d in get_deduction_data_by_id(employee.deduction)
+                ],
                 effective_date=employee.effective_date,
                 currency_of_salary=employee.currency_of_salary,
 
-                # Documents
-                cv_file=employee.cv_file,
-
                 # Status Information
-                is_active=employee.is_active
+                is_active=employee.is_active,
+                # cv_file_url= (request.build_absolute_uri(employee.cv_file.url) if employee.cv_file else None)
     )
 
 # ===============================

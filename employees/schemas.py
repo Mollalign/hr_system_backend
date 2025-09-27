@@ -107,7 +107,7 @@ class CreateAndUpdateEmployeeRequestSchema(Schema):
     # validations
     @field_validator('full_name')
     def validate_full_name(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Full name is required")
         if len(value) < 3:
             raise ValueError("Full name must be at least 3 characters long")
@@ -120,26 +120,26 @@ class CreateAndUpdateEmployeeRequestSchema(Schema):
             raise ValueError("Full name must contain at least first and last name")
         return value
     
-    @field_validator('gender')
-    def validate_gender(cls, value):
-        if not value or value.strip() == "":
-            raise ValueError("Gender is required")
-        valid_genders = ['male', 'female']
-        if value.lower() not in valid_genders:
-            raise ValueError("Gender must be male or female")
-        return value
+    # @field_validator('gender')
+    # def validate_gender(cls, value):
+    #     if not value:
+    #         raise ValueError("Gender is required")
+    #     valid_genders = ['male', 'female']
+    #     if value.lower() not in valid_genders:
+    #         raise ValueError("Gender must be male or female")
+    #     return value
     
-    @field_validator('date_of_birth')
-    def validate_date_of_birth(cls, value):
-        if not value or value.strip() == "":
-            raise ValueError("Date of birth is required")
-        if value > date.today():
-            raise ValueError("Date of birth cannot be in the future")
-        return value
+    # @field_validator('date_of_birth')
+    # def validate_date_of_birth(cls, value):
+    #     if not value:
+    #         raise ValueError("Date of birth is required")
+    #     if value > date.today():
+    #         raise ValueError("Date of birth cannot be in the future")
+    #     return value
     
     @field_validator('maternal_status')
     def validate_maternal_status(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Maternal status is required")
         valid_maternal_status = ['single', 'married', 'divorced', 'widowed']
         if value.lower() not in valid_maternal_status:
@@ -148,7 +148,7 @@ class CreateAndUpdateEmployeeRequestSchema(Schema):
     
     @field_validator('nationality')
     def validate_nationality(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Nationality is required")
         if len(value) < 3:
             raise ValueError("Nationality must be at least 3 characters long")
@@ -160,103 +160,103 @@ class CreateAndUpdateEmployeeRequestSchema(Schema):
     
     @field_validator('email')
     def validate_email(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Email is required")
         return value
 
     @field_validator('phone_number')
     def validate_phone_number(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Phone number is required")
         return value
 
     @field_validator('permanent_address')
     def validate_permanent_address(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Permanent address is required")
         return value
 
     @field_validator('city')
     def validate_city(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("City is required")
         return value
 
     @field_validator('state')
     def validate_state(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("State is required")
         return value
 
     @field_validator('country')
     def validate_country(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Country is required")
         return value
 
     @field_validator('zip_code')
     def validate_zip_code(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Zip code is required")
         return value
 
-    @field_validator('contact_person_name')
-    def validate_contact_person_name(cls, value):
-        if not value or value.strip() == "":
-            raise ValueError("Contact person name is required")
-        return value
+    # @field_validator('contact_person_name')
+    # def validate_contact_person_name(cls, value):
+    #     if not value:
+    #         raise ValueError("Contact person name is required")
+    #     return value
 
     @field_validator('contact_person_relationship')
     def validate_contact_person_relationship(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Contact person relationship is required")
         return value
 
     @field_validator('contact_person_phone')
     def validate_contact_person_phone(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Contact person phone is required")
         return value
 
-    @field_validator('employee_code')
-    def validate_employee_code(cls, value):
-        if not value or value.strip() == "":
-            raise ValueError("Employee code is required")
-        return value
+    # @field_validator('employee_code')
+    # def validate_employee_code(cls, value):
+    #     if not value:
+    #         raise ValueError("Employee code is required")
+    #     return value
 
     @field_validator('job_title')
     def validate_job_title(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Job title is required")
         return value
 
     @field_validator('department')
     def validate_department(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Department is required")
         return value
 
     @field_validator('employee_type')
     def validate_employee_type(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Employee type is required")
         return value
 
-    @field_validator('employment_shift')
-    def validate_employment_shift(cls, value):
-        if not value or value.strip() == "":
-            raise ValueError("Employment shift is required")
-        return value
+    # @field_validator('employment_shift')
+    # def validate_employment_shift(cls, value):
+    #     if not value:
+    #         raise ValueError("Employment shift is required")
+    #     return value
 
     @field_validator('employment_status')
     def validate_employment_status(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Employment status is required")
         return value
 
     @field_validator('hire_date')
     def validate_hire_date(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Hire date is required")
         if value > date.today():
             raise ValueError("Hire date cannot be in the future")
@@ -264,19 +264,19 @@ class CreateAndUpdateEmployeeRequestSchema(Schema):
 
     @field_validator('work_location')
     def validate_work_location(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Work location is required")
         return value
 
     @field_validator('bank_account_number')
     def validate_bank_account_number(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Bank account number is required")
         return value
 
     @field_validator('basic_salary')
     def validate_basic_salary(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Basic salary is required")
         if value <= 0:
             raise ValueError("Basic salary must be greater than 0")
@@ -284,14 +284,14 @@ class CreateAndUpdateEmployeeRequestSchema(Schema):
 
     @field_validator('currency_of_salary')
     def validate_currency_of_salary(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Currency of salary is required")
         
         return value
 
     @field_validator('effective_date')
     def validate_effective_date(cls, value):
-        if not value or value.strip() == "":
+        if not value:
             raise ValueError("Effective date is required")
         return value
 
