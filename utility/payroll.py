@@ -2,25 +2,41 @@
 # PAYROLL UTILS
 # ===============================================================
 
-from hr_system.models.deduction import Deduction
-from hr_system.models.allowance import Allowance
+from deduction.models import Deduction
+from allowance.models import Allowance
 import uuid
 
-def get_tax(tax_data: dict ,salary: float ):
+def get_tax(tax_data: dict, salary: float):
     for data in tax_data:
-        min = float(data["min_salary"])
-        max = float(data["max_salary"]) if data["max_salary"] is not None else float('inf')  # use infinity for UNLIMITED
+        try:
+            min_salary = float(data["min_salary"])
+        except (ValueError, TypeError):
+            continue  # skip if invalid
 
-        if min <= salary <= max:
+        max_val = data.get("max_salary")
+
+        if max_val is None:
+            max_salary = float("inf")
+        elif isinstance(max_val, str) and max_val.lower() in ["UNLIMITED"]:
+            max_salary = float("inf")
+        else:
+            try:
+                max_salary = float(max_val)
+            except (ValueError, TypeError):
+                continue  # skip if invalid
+
+        if min_salary <= salary <= max_salary:
             return data
+    return None
+
       
 # get deductions
-def get_deductions(deduction: dict, salary: float, db_name: str):
+def get_deductions(deduction: dict, salary: float):
     # ===============================
     # DEDUCTIONS
     # ===============================
     # get tax and pension deductions
-    deductions = Deduction.objects.using(db_name).filter(is_active=True, type__in=["Tax", "Pension"])
+    deductions = Deduction.objects.filter(is_active=True, type__in=["Tax", "Pension"])
     deduction_tax = deductions.get(type="Tax")
     deduction_pension = deductions.get(type="Pension")
     all_deduction = {}
@@ -48,7 +64,7 @@ def get_deductions(deduction: dict, salary: float, db_name: str):
     # other deduction
     if deduction:
         for deduction in deduction: 
-            deduction_data = get_deduction_data_by_id(deduction, db_name)
+            deduction_data = get_deduction_data_by_id(deduction)
             if deduction_data:
                 if deduction_data[0]["type"] == "fixed":
                     total_deduction["total"] += float(deduction_data[0]["amount"])
@@ -71,7 +87,7 @@ def get_deductions(deduction: dict, salary: float, db_name: str):
     return all_deduction
 
 # get allowances
-def get_allowances(allowance: list, salary: float, db_name: str):
+def get_allowances(allowance: list, salary: float):
     # ===============================
     # ALLOWANCES
     # ===============================
@@ -82,7 +98,7 @@ def get_allowances(allowance: list, salary: float, db_name: str):
     }   
     if allowance:
         for allowance in allowance:
-            allowance_data = get_allowance_data_by_id(allowance, db_name)
+            allowance_data = get_allowance_data_by_id(allowance)
             if allowance_data:
                 if allowance_data.type == "fixed":
                     total_allowance["total"] += float(allowance_data.amount)
@@ -105,11 +121,11 @@ def get_allowances(allowance: list, salary: float, db_name: str):
     return all_allowance
 
 # is active allowance
-def get_allowance_data_by_id(allowance: uuid.UUID, db_name: str):
-    allowance_data = Allowance.objects.using(db_name).filter(id=allowance, is_active=True, is_deleted=False).first()
+def get_allowance_data_by_id(allowance: uuid.UUID):
+    allowance_data = Allowance.objects.filter(id=allowance, is_active=True, is_deleted=False).first()
     return allowance_data if allowance_data else None
 
-def get_deduction_data_by_id(deduction: uuid.UUID, db_name: str):
-   OtherDeduction = Deduction.objects.using(db_name).filter(is_active=True, type="Other").first()
+def get_deduction_data_by_id(deduction: uuid.UUID):
+   OtherDeduction = Deduction.objects.filter(is_active=True, type="Other").first()
    other_deduction_data = [d for d in OtherDeduction.data if d['id'] == deduction]    
    return other_deduction_data if other_deduction_data else None

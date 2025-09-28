@@ -12,7 +12,7 @@ class Attendance(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     # Basic Information
-    employee_id = models.ForeignKey('Employee', on_delete=models.PROTECT, verbose_name="Employee", null=False, blank=False, related_name="attendances")
+    employee_id = models.ForeignKey('employees.Employee', on_delete=models.PROTECT, verbose_name="Employee", null=False, blank=False, related_name="attendances")
 
     # Attendance Information
     check_in_time = models.TimeField(null=True, blank=True,verbose_name="Check In Time")

@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     "company_address",
     "deduction",
     "allowance",
-    "payroll",
+    "emp_payroll",
 
     # third party
     'ninja',

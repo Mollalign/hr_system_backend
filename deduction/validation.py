@@ -19,7 +19,7 @@ def validate_tax(data: list[dict]):
                 errors[f"{index}.min_salary"] = "Minimum salary must be >= 0 and a number"
 
             # Max salary normalization
-            if isinstance(valid_data.max_salary, str) and valid_data.max_salary.lower() in ["unlimited", "above"]:
+            if isinstance(valid_data.max_salary, str) and valid_data.max_salary.lower() in ["UNLIMITED"]:
                 valid_data.max_salary = None
 
             # Max salary validation (only if it's a number)
@@ -102,6 +102,7 @@ def validate_other_deduction(data: list[dict]):
 
 # validate for deduction
 def validate_deduction(data: list[dict], type: str):
+
     message = ""
 
     if type == 'Tax':
@@ -121,3 +122,4 @@ def validate_deduction(data: list[dict], type: str):
             return str(e)
 
     return message
+
